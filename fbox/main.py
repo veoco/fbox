@@ -12,8 +12,6 @@ async def clean_data():
         await db.clean_expired_boxes()
         db.clean_expire_ip_user()
         await asyncio.sleep(60)
-        print("cleaned")
-
 
 async def startup():
     asyncio.create_task(clean_data())
