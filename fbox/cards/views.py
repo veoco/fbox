@@ -42,7 +42,9 @@ async def card_renew(card: Card = Depends(get_card)):
         raise HTTPException(404)
 
     code = generate_card_code()
-    new_card = Card(level=card.level, count=card.count, code=code, created=card.created)
+    new_card = Card(
+        level=card.level, count=card.count - 1, code=code, created=card.created
+    )
     await db.save_card(new_card)
     db.expire_card(card)
 
