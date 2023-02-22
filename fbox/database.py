@@ -195,7 +195,6 @@ class Database(BoxDatabaseMixin, CardDatabaseMixin, IPUserDatabaseMixin):
     def __init__(self) -> None:
         if not settings.DATA_ROOT.exists():
             settings.DATA_ROOT.mkdir(parents=True)
-            return
 
         box_data = settings.DATA_ROOT / "box"
         if not box_data.exists():
