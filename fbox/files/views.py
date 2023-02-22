@@ -92,7 +92,7 @@ async def post_box(
         code=code,
         status=StatusChoice.waiting,
         created=now,
-        level=LevelChoice.visitor,
+        level=card.level,
         files=box_files,
     )
     await db.save_box(box)
