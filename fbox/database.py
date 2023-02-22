@@ -51,6 +51,7 @@ class BoxDatabaseMixin:
         current.rmdir()
 
     async def clean_expired_boxes(self) -> None:
+        logger.info(f"Box count {len(self.boxes.keys())}")
         logger.info(f"Clean {len(self.expired_boxes)} box")
 
         for box in self.expired_boxes:
@@ -186,6 +187,7 @@ class IPUserDatabaseMixin:
 
     def clean_expire_ip_user(self) -> None:
         now = int(get_now().timestamp())
+        logger.info(f"IP users count {len(self.ip_users.keys())}")
         logger.info(f"Clean {len(self.ip_users.values())} ip users")
 
         for ip_user in self.ip_users.values():
