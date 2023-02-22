@@ -9,6 +9,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 
+from fbox.log import logger
 from fbox.utils import get_now
 from fbox.database import db
 from fbox.cards.choices import LevelChoice
@@ -96,6 +97,8 @@ async def post_box(
     )
     await db.save_box(box)
 
+    logger.info(f"Created box {box.code} with {len(files)} files")
+
     update_rate(ip_user, "box", 10)
 
     return {"code": code, "detail": "20101"}
@@ -144,6 +147,8 @@ async def patch_box(
     box.status = StatusChoice.complete
     box.created = now
     await db.save_box(box)
+
+    logger.info(f"Completed box {box.code}")
 
     await write_log(request, code, now)
 
@@ -226,5 +231,7 @@ async def patch_file(
     box_file.status = StatusChoice.complete
     box.files[filename] = box_file
     await db.save_box(box)
+
+    logger.info(f"Completed box {box.code} file {filename}")
 
     return {"code": code, "filename": filename, "detail": "20001"}

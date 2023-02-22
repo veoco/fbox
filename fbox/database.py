@@ -1,6 +1,7 @@
 import shutil, asyncio
 
 from fbox import settings
+from fbox.log import logger
 from fbox.utils import get_now
 from fbox.files.models import Box, File, IPUser
 from fbox.files.choices import StatusChoice
@@ -13,6 +14,8 @@ class BoxDatabaseMixin:
 
     def init_boxes(self) -> None:
         box_data = settings.DATA_ROOT / "box"
+        logger.info(f"Initialize boxes")
+
         for box_path in box_data.iterdir():
             box_code = box_path.name
             box_dir = box_data / box_code
@@ -25,12 +28,19 @@ class BoxDatabaseMixin:
             box = Box.parse_file(box_json)
 
             if self.check_box_expire(box):
+                logger.debug(f"Box {box.code} expire")
+
                 self.expire_box(box)
                 continue
-
+            
+            logger.debug(f"Box {box.code} valid")
             self.boxes[box.code] = box
+        
+        logger.info(f"Initialize boxes finishied")
 
     def archive_box(self, box: Box) -> None:
+        logger.debug(f"Archive box {box.code}")
+
         now = get_now()
         current = settings.DATA_ROOT / "box" / box.code
         target = settings.LOGS_ROOT / "box" / box.code / now.isoformat()
@@ -41,12 +51,18 @@ class BoxDatabaseMixin:
         current.rmdir()
 
     async def clean_expired_boxes(self) -> None:
+        logger.info(f"Clean {len(self.expired_boxes)} box")
+
         for box in self.expired_boxes:
             await asyncio.to_thread(self.archive_box, box)
+        
+        logger.info(f"Clean box finished")
 
     def check_box_expire(self, box: Box) -> bool:
         now = int(get_now().timestamp())
         passed = now - box.created
+
+        logger.debug(f"Box {box.code} with status {box.status} passed {passed} seconds")
 
         waiting_expire = box.status == StatusChoice.waiting and passed >= (2 * 3600)
         complete_expire = box.status == StatusChoice.complete and passed >= (24 * 3600)
@@ -109,18 +125,27 @@ class CardDatabaseMixin:
 
     def init_cards(self) -> None:
         card_data = settings.DATA_ROOT / "card"
+        logger.info(f"Initialize cards")
+
         for card_path in card_data.iterdir():
             card_json = card_data / card_path.name
             card = Card.parse_file(card_json)
 
             if self.check_card_expire(card):
+                logger.debug(f"Card {card.code} expire")
+
                 self.expire_card(card)
                 continue
 
+            logger.debug(f"Card {card.code} valid")
             self.cards[card.code] = card
+        
+        logger.info(f"Initialize cards finishied")
 
     def check_card_expire(self, card: Card) -> bool:
         now = int(get_now().timestamp())
+
+        logger.debug(f"card {card.code} with count {card.count} passed {now - card.created} seconds")
 
         if card.created > 0 and (now - card.created) >= (365 * 24 * 3600):
             return True
@@ -161,11 +186,14 @@ class IPUserDatabaseMixin:
 
     def clean_expire_ip_user(self) -> None:
         now = int(get_now().timestamp())
+        logger.info(f"Clean {len(self.ip_users.values())} ip users")
 
         for ip_user in self.ip_users.values():
             error_expire = (now - ip_user.error_from) > 3600
             box_expire = (now - ip_user.box_from) > 3600
             file_expire = (now - ip_user.file_from) > 3600
+
+            logger.debug(f"{ip_user.ip} error {error_expire}, box {box_expire}, file {file_expire}")
 
             if error_expire and box_expire and file_expire:
                 del self.ip_users[ip_user.ip]
@@ -183,6 +211,8 @@ class IPUserDatabaseMixin:
                     ip_user.file_from = 0
 
                 self.save_ip_user(ip_user)
+        
+        logger.info(f"Clean ip users finishied")
 
     def get_ip_user(self, ip: str) -> IPUser | None:
         return self.ip_users.get(ip)

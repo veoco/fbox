@@ -6,6 +6,7 @@ from fastapi import (
 )
 
 from fbox import settings
+from fbox.log import logger
 from fbox.database import db
 from fbox.cards.models import Card
 from fbox.cards.choices import LevelChoice
@@ -23,6 +24,8 @@ async def post_cards(password: str = Body(embed=True)):
     code = generate_card_code()
     card = Card(code=code, level=LevelChoice.red, count=10, created=0)
     await db.save_card(card)
+
+    logger.info(f"Generated card {card.code}")
 
     data = {"sub": code}
     token = create_jwt(data)
@@ -47,6 +50,8 @@ async def card_renew(card: Card = Depends(get_card)):
     )
     await db.save_card(new_card)
     db.expire_card(card)
+
+    logger.info(f"Renew card {card.code} with card{new_card.code}")
 
     data = {"sub": code}
     token = create_jwt(data)
