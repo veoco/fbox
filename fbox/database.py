@@ -110,7 +110,7 @@ class CardDatabaseMixin:
     def init_cards(self) -> None:
         card_data = settings.DATA_ROOT / "card"
         for card_path in card_data.iterdir():
-            card_json = card_path.name
+            card_json = card_data / card_path.name
             card = Card.parse_file(card_json)
 
             if self.check_card_expire(card):
