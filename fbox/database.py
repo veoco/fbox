@@ -41,9 +41,9 @@ class BoxDatabaseMixin:
     def archive_box(self, box: Box) -> None:
         logger.debug(f"Archive box {box.code}")
 
-        now = get_now()
+        now = int(get_now().timestamp())
         current = settings.DATA_ROOT / "box" / box.code
-        target = settings.LOGS_ROOT / "box" / box.code / now.isoformat()
+        target = settings.LOGS_ROOT / "box" / box.code / now
         target.mkdir(parents=True)
 
         for f in current.iterdir():
