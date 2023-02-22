@@ -25,9 +25,6 @@ async def get_card(token: str | None = Depends(oauth2_scheme)):
         card = db.get_card(code)
         if card is None:
             return any_card
-
-        card.count -= 1
-        await db.save_card(card)
         
         return card
     except JWTError as e:
