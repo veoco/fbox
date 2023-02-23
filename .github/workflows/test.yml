@@ -12,6 +12,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: test
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.11
