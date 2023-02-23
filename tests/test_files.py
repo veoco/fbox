@@ -4,12 +4,10 @@ from tests.common import BASE_URL, ADMIN_PASSWORD
 
 
 def test_create_waiting_box(client: Client):
-    data = {
-        "files": [
-            {"name": "test-waiting-file-1.jpg", "size": 1024},
-            {"name": "test-waiting-file-2.jpg", "size": 2048},
-        ]
-    }
+    data = [
+        {"name": "test-waiting-file-1.jpg", "size": 1024},
+        {"name": "test-waiting-file-2.jpg", "size": 2048},
+    ]
     r = client.post(f"{BASE_URL}/api/files/", json=data)
     assert r.status_code == 201
 
