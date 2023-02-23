@@ -1,7 +1,7 @@
 import requests
 
 def generate(i):
-    r = requests.post('https://dbox.cf/api/cards/', json={"password": "password"})
+    r = requests.post('https://dbox.cf/api/cards/', headers={"Token": "password"})
     token: str = r.json()["token"]
     text = token.rjust(1024)
 

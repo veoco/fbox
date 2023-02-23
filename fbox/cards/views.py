@@ -1,26 +1,22 @@
 from fastapi import (
     APIRouter,
     HTTPException,
-    Body,
     Depends,
 )
 
-from fbox import settings
 from fbox.log import logger
 from fbox.database import db
 from fbox.cards.models import Card
 from fbox.cards.choices import LevelChoice
 from fbox.cards.utils import generate_card_code, create_jwt
 from fbox.cards.depends import get_card
+from fbox.admin.depends import token_required
 
 router = APIRouter(tags=["Cards"])
 
 
-@router.post("/cards/")
-async def post_cards(password: str = Body(embed=True)):
-    if password != settings.ADMIN_PASSWORD:
-        raise HTTPException(400)
-
+@router.post("/cards/", dependencies=[Depends(token_required)])
+async def post_cards():
     code = generate_card_code()
     card = Card(code=code, level=LevelChoice.red, count=10, created=0)
     await db.save_card(card)
