@@ -75,7 +75,7 @@ class BoxDatabaseMixin:
         return False
 
     def check_box_by_code(self, code: str) -> bool:
-        return code in self.boxes
+        return code in self.boxes or code in self.expired_boxes
 
     def get_box(self, code: str) -> Box | None:
         box = self.boxes.get(code)
