@@ -41,7 +41,7 @@ class BoxDatabaseMixin:
     def archive_box(self, box: Box) -> None:
         logger.debug(f"Archive box {box.code}")
 
-        now = int(get_now().timestamp())
+        now = get_now().date().isoformat()
         current = settings.DATA_ROOT / "box" / box.code
         target = settings.LOGS_ROOT / "box" / box.code / now
         target.mkdir(parents=True)
@@ -56,6 +56,8 @@ class BoxDatabaseMixin:
 
         for box in self.expired_boxes:
             await asyncio.to_thread(self.archive_box, box)
+        
+        self.expired_boxes.clear()
         
         logger.info(f"Clean box finished")
 
