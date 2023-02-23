@@ -77,7 +77,7 @@ class BoxDatabaseMixin:
 
     def get_box(self, code: str) -> Box | None:
         box = self.boxes.get(code)
-        if self.check_box_expire(box):
+        if box and self.check_box_expire(box):
             self.expire_box(box)
             return None
         return box
@@ -161,7 +161,7 @@ class CardDatabaseMixin:
 
     def get_card(self, code: str) -> Card | None:
         card = self.cards.get(code)
-        if self.check_card_expire(card):
+        if card and self.check_card_expire(card):
             self.expire_card(card)
             return None
         return card
