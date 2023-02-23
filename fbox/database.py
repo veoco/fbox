@@ -201,7 +201,8 @@ class IPUserDatabaseMixin:
     def clean_expire_ip_user(self) -> None:
         now = int(get_now().timestamp())
         logger.info(f"IP users count {len(self.ip_users.keys())}")
-        logger.info(f"Clean {len(self.ip_users.values())} ip users")
+        logger.info(f"Clean ip users")
+        expired = []
 
         for ip_user in self.ip_users.values():
             error_expire = (now - ip_user.error_from) > 3600
@@ -212,8 +213,9 @@ class IPUserDatabaseMixin:
                 f"{ip_user.ip} error {error_expire}, box {box_expire}, file {file_expire}"
             )
 
+
             if error_expire and box_expire and file_expire:
-                del self.ip_users[ip_user.ip]
+                expired.append(ip_user.ip)
             else:
                 if error_expire:
                     ip_user.error_count = 0
@@ -229,7 +231,10 @@ class IPUserDatabaseMixin:
 
                 self.save_ip_user(ip_user)
 
-        logger.info(f"Clean ip users finishied")
+        for ip in expired:
+            del self.ip_users[ip]
+
+        logger.info(f"Clean {len(expired)} ip users finishied")
 
     def get_ip_user(self, ip: str) -> IPUser | None:
         return self.ip_users.get(ip)
