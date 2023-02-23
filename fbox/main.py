@@ -6,6 +6,7 @@ from fbox.log import logger
 from fbox.database import db
 from fbox.files.views import router as files_router
 from fbox.cards.views import router as cards_router
+from fbox.admin.views import router as admin_router
 
 
 async def clean_data():
@@ -37,3 +38,4 @@ app = FastAPI(
 
 app.include_router(files_router, prefix="/api")
 app.include_router(cards_router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
