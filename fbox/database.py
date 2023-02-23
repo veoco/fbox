@@ -32,10 +32,10 @@ class BoxDatabaseMixin:
 
                 self.expire_box(box)
                 continue
-            
+
             logger.debug(f"Box {box.code} valid")
             self.boxes[box.code] = box
-        
+
         logger.info(f"Initialize boxes finishied")
 
     def archive_box(self, box: Box) -> None:
@@ -56,9 +56,9 @@ class BoxDatabaseMixin:
 
         for box in self.expired_boxes:
             await asyncio.to_thread(self.archive_box, box)
-        
+
         self.expired_boxes.clear()
-        
+
         logger.info(f"Clean box finished")
 
     def check_box_expire(self, box: Box) -> bool:
@@ -83,6 +83,11 @@ class BoxDatabaseMixin:
             self.expire_box(box)
             return None
         return box
+
+    def get_boxes(self, expired: bool) -> list[Box]:
+        if expired:
+            return self.expired_boxes
+        return list(self.boxes.values())
 
     def save_box_file(self, box: Box) -> None:
         box_file = settings.DATA_ROOT / "box" / box.code / "box.json"
@@ -142,13 +147,15 @@ class CardDatabaseMixin:
 
             logger.debug(f"Card {card.code} valid")
             self.cards[card.code] = card
-        
+
         logger.info(f"Initialize cards finishied")
 
     def check_card_expire(self, card: Card) -> bool:
         now = int(get_now().timestamp())
 
-        logger.debug(f"card {card.code} with count {card.count} passed {now - card.created} seconds")
+        logger.debug(
+            f"card {card.code} with count {card.count} passed {now - card.created} seconds"
+        )
 
         if card.created > 0 and (now - card.created) >= (365 * 24 * 3600):
             return True
@@ -197,7 +204,9 @@ class IPUserDatabaseMixin:
             box_expire = (now - ip_user.box_from) > 3600
             file_expire = (now - ip_user.file_from) > 3600
 
-            logger.debug(f"{ip_user.ip} error {error_expire}, box {box_expire}, file {file_expire}")
+            logger.debug(
+                f"{ip_user.ip} error {error_expire}, box {box_expire}, file {file_expire}"
+            )
 
             if error_expire and box_expire and file_expire:
                 del self.ip_users[ip_user.ip]
@@ -209,13 +218,13 @@ class IPUserDatabaseMixin:
                 if box_expire:
                     ip_user.box_count = 0
                     ip_user.box_from = 0
-                
+
                 if file_expire:
                     ip_user.file_count = 0
                     ip_user.file_from = 0
 
                 self.save_ip_user(ip_user)
-        
+
         logger.info(f"Clean ip users finishied")
 
     def get_ip_user(self, ip: str) -> IPUser | None:
