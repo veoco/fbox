@@ -19,3 +19,5 @@ SECRET_KEY = config("SECRET_KEY", cast=Secret)
 ALGORITHM = "HS256"
 
 ADMIN_PASSWORD = config("ADMIN_PASSWORD", cast=str, default="password")
+
+BOX_EXPIRE = config("BOX_EXPIRE", cast=int, default=24 * 3600)

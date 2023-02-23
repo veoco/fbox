@@ -67,8 +67,12 @@ class BoxDatabaseMixin:
 
         logger.debug(f"Box {box.code} with status {box.status} passed {passed} seconds")
 
-        waiting_expire = box.status == StatusChoice.waiting and passed >= (2 * 3600)
-        complete_expire = box.status == StatusChoice.complete and passed >= (24 * 3600)
+        waiting_expire = box.status == StatusChoice.waiting and passed >= (
+            settings.BOX_EXPIRE / 10
+        )
+        complete_expire = (
+            box.status == StatusChoice.complete and passed >= settings.BOX_EXPIRE
+        )
 
         if waiting_expire or complete_expire:
             return True
