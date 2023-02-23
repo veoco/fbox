@@ -11,7 +11,7 @@ from fbox.admin.depends import token_required
 router = APIRouter(tags=["Admin"], dependencies=[Depends(token_required)])
 
 
-@router.get("/admin/boxes/")
+@router.get("/admin/boxes/", response_model=list[Box])
 async def get_boxes(expired: bool = False) -> list[Box]:
     boxes = db.get_boxes(expired)
     if len(boxes) > 100:
@@ -19,7 +19,7 @@ async def get_boxes(expired: bool = False) -> list[Box]:
     return boxes
 
 
-@router.get("/admin/boxes/{code}")
+@router.get("/admin/boxes/{code}", response_model=Box)
 async def get_box(code: str) -> Box:
     box = db.get_box(code)
     if box is None:
