@@ -26,5 +26,5 @@ def test_create_waiting_box(client: Client):
     files = box["files"]
     assert len(files) == 2
 
-    for f in files:
+    for f in files.values():
         assert f["status"] == 1
