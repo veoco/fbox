@@ -1,3 +1,5 @@
+import hashlib
+
 from httpx import Client
 
 from tests.common import BASE_URL, ADMIN_PASSWORD
@@ -28,3 +30,33 @@ def test_create_waiting_box(client: Client):
 
     for f in files.values():
         assert f["status"] == 1
+
+
+def test_create_complete_file(client: Client):
+    filename = "test-complete-file-1.jpg"
+    data = [
+        {"name": filename, "size": 4096},
+    ]
+    r = client.post(f"{BASE_URL}/api/files/", json=data)
+    res = r.json()
+    code = res["code"]
+
+    content = b"12345678" * 128
+    m = hashlib.sha256()
+    for _ in range(4):
+        m.update(content)
+    content_hash = m.hexdigest()
+
+    for i in range(4):
+        data = {
+            filename: content,
+            "offset": i * 1024,
+            "sha256": content_hash,
+        }
+        r = client.post(f"{BASE_URL}/api/files/{code}/{filename}", files=data)
+        assert r.status_code == 200
+
+    r = client.patch(
+        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": content_hash}
+    )
+    assert r.status_code == 200
