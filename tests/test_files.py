@@ -43,13 +43,13 @@ def test_create_complete_file(client: Client):
     code = res["code"]
 
     content = b"12345678" * 128
+    content_hash = hashlib.sha256(content).hexdigest()
     content_bytes = BytesIO(content)
     files = {"file": (filename, content_bytes)}
     m = hashlib.sha256()
 
     for i in range(4):
         m.update(content)
-        content_hash = m.hexdigest()
         data = {
             "offset": i * 1024,
             "sha256": content_hash,
@@ -57,6 +57,7 @@ def test_create_complete_file(client: Client):
         r = client.post(
             f"{BASE_URL}/api/files/{code}/{filename}", files=files, data=data
         )
+        print(r.text)
         assert r.status_code == 200
 
     r = client.patch(
