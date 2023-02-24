@@ -1,4 +1,5 @@
 import hashlib
+from io import BytesIO
 
 from httpx import Client
 
@@ -46,10 +47,11 @@ def test_create_complete_file(client: Client):
     for _ in range(4):
         m.update(content)
     content_hash = m.hexdigest()
+    content_bytes = BytesIO(content)
 
     for i in range(4):
         data = {
-            filename: content,
+            filename: content_bytes,
             "offset": i * 1024,
             "sha256": content_hash,
         }
