@@ -64,3 +64,30 @@ def test_create_complete_file(client: Client):
         f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": m.hexdigest()}
     )
     assert r.status_code == 200
+
+
+def test_create_complete_box(client: Client):
+    filename = "test-complete-file-2.jpg"
+    data = [
+        {"name": filename, "size": 4096},
+    ]
+    r = client.post(f"{BASE_URL}/api/files/", json=data)
+    res = r.json()
+    code = res["code"]
+
+    content = b"12345678" * 512
+    content_hash = hashlib.sha256(content).hexdigest()
+    content_bytes = BytesIO(content)
+    files = {"file": (filename, content_bytes)}
+    data = {
+        "offset": 0,
+        "sha256": content_hash,
+    }
+
+    r = client.post(f"{BASE_URL}/api/files/{code}/{filename}", files=files, data=data)
+    r = client.patch(
+        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": content_hash}
+    )
+
+    r = client.patch(f"{BASE_URL}/api/files/{code}")
+    assert r.status_code == 200
