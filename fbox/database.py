@@ -178,7 +178,7 @@ class IPUserDatabaseMixin:
 
     def clean_expire_ip_user(self) -> None:
         now = int(get_now().timestamp())
-        logger.info(f"IP users count {len(self.ip_users.keys())}")
+        logger.info(f"IP users count {len(self.ip_users)}")
         logger.info(f"Clean ip users")
         expired = []
 
