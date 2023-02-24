@@ -35,7 +35,7 @@ class BoxDatabaseMixin:
 
     async def clean_expired_boxes(self) -> None:
         logger.info(f"Check {len(self.boxes)} box")
-        box_codes = self.boxes.keys()
+        box_codes = list(self.boxes.keys())
         for code in box_codes:
             box = self.boxes[code]
             if self.check_box_expire(box):
