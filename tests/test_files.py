@@ -49,7 +49,7 @@ def test_create_complete_file(client: Client):
     content_hash = m.hexdigest()
     content_bytes = BytesIO(content)
     files = {
-        filename: content_bytes,
+        "file": (filename, content_bytes)
     }
 
     for i in range(4):
