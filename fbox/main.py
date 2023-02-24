@@ -11,7 +11,7 @@ from fbox.admin.views import router as admin_router
 
 async def clean_data():
     while True:
-        logger.info("Runing clean data")
+        logger.info("Running clean data")
 
         await db.clean_expired_boxes()
         db.clean_expire_ip_user()
@@ -22,6 +22,9 @@ async def clean_data():
 
 async def startup():
     logger.info("Running startup task")
+
+    await db.init_db()
+    logger.info("Init database complete")
 
     asyncio.create_task(clean_data())
 

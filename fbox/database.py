@@ -5,6 +5,7 @@ from fbox.log import logger
 from fbox.utils import get_now
 from fbox.files.models import Box, File, IPUser
 from fbox.files.choices import StatusChoice
+from fbox.files.storage import storage
 from fbox.cards.models import Card
 
 
@@ -12,24 +13,18 @@ class BoxDatabaseMixin:
     boxes: dict[str, Box] = {}
     expired_boxes: list[Box] = []
 
-    def init_boxes(self) -> None:
-        box_data = settings.DATA_ROOT / "box"
+    async def init_boxes(self) -> None:
         logger.info(f"Initialize boxes")
+        box_codes = await storage.get_dir_filenames("box")
 
-        for box_path in box_data.iterdir():
-            box_code = box_path.name
-            box_dir = box_data / box_code
-            box_json = box_dir / "box.json"
-
-            if not box_json.exists():
-                shutil.rmtree(box_dir)
+        for box_code in box_codes:
+            box = await storage.get_box(box_code)
+            if box is None:
+                await storage.remove_box(box_code)
                 continue
-
-            box = Box.parse_file(box_json)
 
             if self.check_box_expire(box):
                 logger.debug(f"Box {box.code} expire")
-
                 self.expire_box(box)
                 continue
 
@@ -38,27 +33,19 @@ class BoxDatabaseMixin:
 
         logger.info(f"Initialize boxes finishied")
 
-    def archive_box(self, box: Box) -> None:
-        logger.debug(f"Archive box {box.code}")
-
-        now = get_now().date().isoformat()
-        current = settings.DATA_ROOT / "box" / box.code
-        target = settings.LOGS_ROOT / "box" / box.code / now
-        target.mkdir(parents=True)
-
-        for f in current.iterdir():
-            shutil.move(f, target)
-        current.rmdir()
-
     async def clean_expired_boxes(self) -> None:
-        logger.info(f"Box count {len(self.boxes.keys())}")
-        logger.info(f"Clean {len(self.expired_boxes)} box")
+        logger.info(f"Check {len(self.boxes)} box")
+        box_codes = self.boxes.keys()
+        for code in box_codes:
+            box = self.boxes[code]
+            if self.check_box_expire(box):
+                self.expire_box(box)
 
+        logger.info(f"Box count {len(self.boxes)}, expired {len(self.expired_boxes)}")
         for box in self.expired_boxes:
-            await asyncio.to_thread(self.archive_box, box)
+            await storage.archive_box(box)
 
         self.expired_boxes.clear()
-
         logger.info(f"Clean box finished")
 
     def check_box_expire(self, box: Box) -> bool:
@@ -93,14 +80,9 @@ class BoxDatabaseMixin:
             return self.expired_boxes
         return list(self.boxes.values())
 
-    def save_box_file(self, box: Box) -> None:
-        box_file = settings.DATA_ROOT / "box" / box.code / "box.json"
-        with open(box_file, "w") as f:
-            f.write(box.json())
-
     async def save_box(self, box: Box) -> None:
         self.boxes[box.code] = box
-        await asyncio.to_thread(self.save_box_file, box)
+        await storage.save_box(box)
 
     def expire_box(self, box: Box) -> None:
         self.expired_boxes.append(box)
@@ -135,17 +117,19 @@ class CardDatabaseMixin:
     cards: dict[str, Card] = {}
     expired_cards: list[str] = []
 
-    def init_cards(self) -> None:
-        card_data = settings.DATA_ROOT / "card"
+    async def init_cards(self) -> None:
         logger.info(f"Initialize cards")
 
-        for card_path in card_data.iterdir():
-            card_json = card_data / card_path.name
-            card = Card.parse_file(card_json)
+        card_json_names = await storage.get_dir_filenames("card")
+
+        for card_json_name in card_json_names:
+            card_code = card_json_name.split(".")[0]
+            card = await storage.get_card(card_code)
+            if card is None:
+                continue
 
             if self.check_card_expire(card):
                 logger.debug(f"Card {card.code} expire")
-
                 self.expire_card(card)
                 continue
 
@@ -158,7 +142,7 @@ class CardDatabaseMixin:
         now = int(get_now().timestamp())
 
         logger.debug(
-            f"card {card.code} with count {card.count} passed {now - card.created} seconds"
+            f"Card {card.code} count {card.count} passed {now - card.created} seconds"
         )
 
         if card.created > 0 and (now - card.created) >= (365 * 24 * 3600):
@@ -179,14 +163,8 @@ class CardDatabaseMixin:
             return None
         return card
 
-    def save_card_file(self, card: Card) -> None:
-        card_file = settings.DATA_ROOT / "card" / f"{card.code}.json"
-        with open(card_file, "w") as f:
-            f.write(card.json())
-
     async def save_card(self, card: Card) -> None:
-        self.cards[card.code] = card
-        await asyncio.to_thread(self.save_card_file, card)
+        await storage.save_card(card)
 
     def expire_card(self, card: Card) -> None:
         self.expired_cards.append(card.code)
@@ -212,7 +190,6 @@ class IPUserDatabaseMixin:
             logger.debug(
                 f"{ip_user.ip} error {error_expire}, box {box_expire}, file {file_expire}"
             )
-
 
             if error_expire and box_expire and file_expire:
                 expired.append(ip_user.ip)
@@ -244,21 +221,11 @@ class IPUserDatabaseMixin:
 
 
 class Database(BoxDatabaseMixin, CardDatabaseMixin, IPUserDatabaseMixin):
-    def __init__(self) -> None:
-        if not settings.DATA_ROOT.exists():
-            settings.DATA_ROOT.mkdir(parents=True)
+    async def init_db(self) -> None:
+        await storage.init_root()
 
-        box_data = settings.DATA_ROOT / "box"
-        if not box_data.exists():
-            box_data.mkdir(parents=True)
-        else:
-            self.init_boxes()
-
-        card_data = settings.DATA_ROOT / "card"
-        if not card_data.exists():
-            card_data.mkdir(parents=True)
-        else:
-            self.init_cards()
+        await self.init_boxes()
+        await self.init_cards()
 
 
 db = Database()

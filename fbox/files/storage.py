@@ -1,4 +1,4 @@
-import asyncio, os, hashlib
+import asyncio, os, hashlib, shutil
 from typing import BinaryIO
 from pathlib import Path
 from shutil import disk_usage
@@ -6,10 +6,25 @@ from shutil import disk_usage
 from fastapi import UploadFile
 
 from fbox import settings
+from fbox.utils import get_now
+from fbox.files.models import Box
+from fbox.cards.models import Card
 
 
 class FileSystemStorage:
     CHUNK_SIZE = 256 * 1024
+
+    async def init_root(self):
+        data_root = settings.DATA_ROOT
+        box_data = data_root / "box"
+        card_data = data_root / "card"
+
+        box_data.mkdir(parents=True, exist_ok=True)
+        card_data.mkdir(parents=True, exist_ok=True)
+
+        logs_root = settings.LOGS_ROOT
+        box_logs = logs_root / "box"
+        box_logs.mkdir(parents=True, exist_ok=True)
 
     async def get_filepath(self, code: str, filename: str):
         filepath = settings.DATA_ROOT / "box" / code / "files" / filename
@@ -75,3 +90,70 @@ class FileSystemStorage:
     async def delete_files(self, filepaths: list[Path]):
         tasks = [self.delete_file(filepath) for filepath in filepaths]
         await asyncio.gather(*tasks)
+
+    async def get_dir_filenames(self, dirname: str) -> list[str]:
+        dirpath = settings.DATA_ROOT / dirname
+        filenames = []
+        for path in dirpath.iterdir():
+            filename = path.name
+            filenames.append(filename)
+        return filenames
+
+    def _get_box(self, code: str) -> Box | None:
+        box_json = settings.DATA_ROOT / "box" / code / "box.json"
+        if box_json.exists():
+            box = Box.parse_file(box_json)
+            return box
+        return None
+
+    async def get_box(self, code: str) -> Box | None:
+        return await asyncio.to_thread(self._get_box, code)
+    
+    def _save_box(self, box: Box) -> None:
+        box_file = settings.DATA_ROOT / "box" / box.code / "box.json"
+        with open(box_file, "w") as f:
+            f.write(box.json())
+
+    async def save_box(self, box: Box) -> None:
+        await asyncio.to_thread(self._save_box, box)
+    
+    def _remove_box(self, code: str) -> None:
+        box_dir = settings.DATA_ROOT / "box" / code
+        shutil.rmtree(box_dir)
+    
+    async def remove_box(self, code: str) -> None:
+         await asyncio.to_thread(self._remove_box, code)
+
+    def _archive_box(self, box: Box) -> None:
+        now = get_now().date().isoformat()
+        current = settings.DATA_ROOT / "box" / box.code
+        target = settings.LOGS_ROOT / "box" / box.code / now
+        target.mkdir(parents=True)
+
+        for f in current.iterdir():
+            shutil.move(f, target)
+        current.rmdir()
+
+    async def archive_box(self, box: Box) -> None:
+        await asyncio.to_thread(self._archive_box, box)
+
+    def _get_card(self, code: str) -> Card | None:
+        card_json = settings.DATA_ROOT / "card" / f"{code}.json"
+        if card_json.exists():
+            card = Card.parse_file(card_json)
+            return card
+        return None
+
+    async def get_card(self, code: str) -> Card | None:
+        return await asyncio.to_thread(self._get_card, code)
+
+    def _save_card(self, card: Card) -> None:
+        card_json = settings.DATA_ROOT / "card" / f"{card.code}.json"
+        with open(card_json, "w") as f:
+            f.write(card.json())
+
+    async def save_card(self, card: Card) -> None:
+        await asyncio.to_thread(self._save_card, card)
+
+
+storage = FileSystemStorage()
