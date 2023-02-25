@@ -164,6 +164,7 @@ class CardDatabaseMixin:
         return card
 
     async def save_card(self, card: Card) -> None:
+        self.cards[card.code] = card
         await storage.save_card(card)
 
     def expire_card(self, card: Card) -> None:
