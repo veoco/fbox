@@ -21,7 +21,7 @@ def test_renew_card(client: Client):
     res = r.json()
     token = res["token"]
 
-    r = client.get(
+    r = client.post(
         f"{BASE_URL}/api/cards/renew", headers={"Authorization": f"Bearer {token}"}
     )
     res = r.json()
@@ -35,4 +35,4 @@ def test_renew_card(client: Client):
     r = client.get(
         f"{BASE_URL}/api/cards/detail", headers={"Authorization": f"Bearer {new_token}"}
     )
-    assert r.status_code == 404
+    assert r.status_code == 200
