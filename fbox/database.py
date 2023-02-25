@@ -1,5 +1,3 @@
-import shutil, asyncio
-
 from fbox import settings
 from fbox.log import logger
 from fbox.utils import get_now

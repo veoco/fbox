@@ -1,12 +1,15 @@
 from enum import IntEnum
 
+
 class StatusChoice(IntEnum):
     waiting = 1
     complete = 2
 
+
 class LevelChoice(IntEnum):
     visitor = 1
     red = 2
+
 
 class UploadFailChoice(IntEnum):
     empty_file = 40001

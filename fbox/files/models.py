@@ -9,6 +9,7 @@ class File(BaseModel):
     filename: str
     size: int
 
+
 class FileCreate(BaseModel):
     name: str
     size: int

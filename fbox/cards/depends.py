@@ -25,7 +25,7 @@ async def get_card(token: str | None = Depends(oauth2_scheme)):
         card = db.get_card(code)
         if card is None:
             return any_card
-        
+
         return card
     except JWTError as e:
         return any_card

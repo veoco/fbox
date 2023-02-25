@@ -30,5 +30,6 @@ class LogConfig(BaseModel):
         LOGGER_NAME: {"handlers": ["default"], "level": LOG_LEVEL},
     }
 
+
 logging.config.dictConfig(LogConfig().dict())
 logger = logging.getLogger("fbox")

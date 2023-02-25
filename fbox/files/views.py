@@ -52,7 +52,7 @@ async def post_box(
     if card.level == LevelChoice.red:
         card.count -= 1
         await db.save_card(card)
-        
+
         files_size_max = 1024 * 1024 * 1024
 
     check_rate(ip_user, "box")

@@ -108,7 +108,7 @@ class FileSystemStorage:
 
     async def get_box(self, code: str) -> Box | None:
         return await asyncio.to_thread(self._get_box, code)
-    
+
     def _save_box(self, box: Box) -> None:
         box_file = settings.DATA_ROOT / "box" / box.code / "box.json"
         with open(box_file, "w") as f:
@@ -116,13 +116,13 @@ class FileSystemStorage:
 
     async def save_box(self, box: Box) -> None:
         await asyncio.to_thread(self._save_box, box)
-    
+
     def _remove_box(self, code: str) -> None:
         box_dir = settings.DATA_ROOT / "box" / code
         shutil.rmtree(box_dir)
-    
+
     async def remove_box(self, code: str) -> None:
-         await asyncio.to_thread(self._remove_box, code)
+        await asyncio.to_thread(self._remove_box, code)
 
     def _archive_box(self, box: Box) -> None:
         now = get_now().date().isoformat()
