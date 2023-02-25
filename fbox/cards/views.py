@@ -28,7 +28,7 @@ async def post_cards():
     return {"token": token}
 
 
-@router.post("/cards/detail")
+@router.get("/cards/detail")
 async def card_detail(card: Card = Depends(get_card)):
     if card.count == 0:
         raise HTTPException(404)
