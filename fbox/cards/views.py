@@ -15,7 +15,7 @@ from fbox.admin.depends import token_required
 router = APIRouter(tags=["Cards"])
 
 
-@router.post("/cards/", dependencies=[Depends(token_required)])
+@router.post("/cards/", status_code=201, dependencies=[Depends(token_required)])
 async def post_cards():
     code = generate_card_code()
     card = Card(code=code, level=LevelChoice.red, count=10, created=0)
