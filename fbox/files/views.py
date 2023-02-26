@@ -9,6 +9,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 
+from fbox import settings
 from fbox.log import logger
 from fbox.utils import get_now
 from fbox.database import db
@@ -84,8 +85,7 @@ async def post_box(
         file = File(status=StatusChoice.waiting, filename=f.name, size=f.size)
         box_files[f.name] = file
 
-        filepath = await storage.get_filepath(code, f.name)
-        await storage.save_dummy_file(filepath, f.size)
+        upload_url = await storage.save_dummy_file(code, f.name, f.size)
 
     box = Box(
         code=code,
@@ -167,7 +167,8 @@ async def get_file(
     file = get_file_or_404(ip_user, code, filename)
     if file and file.status == StatusChoice.complete:
         filepath = await storage.get_filepath(code, filename)
-        return FileResponse(filepath, filename=file.filename)
+        path = settings.DATA_ROOT / filepath
+        return FileResponse(path, filename=file.filename)
 
     raise HTTPException(status_code=404)
 
@@ -199,8 +200,7 @@ async def post_file(
     if file_sha256 != sha256:
         raise HTTPException(status_code=400, detail=f"UploadFailChoice.invalid_file")
 
-    filepath = await storage.get_filepath(code, filename)
-    await storage.save_file_slice(filepath, file, offset)
+    await storage.save_file_slice(code, filename, file, offset)
 
     update_rate(ip_user, "file", 10 * 1024 * 1024 * 1024, file_size)
 
@@ -222,8 +222,7 @@ async def patch_file(
     if box_file.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
 
-    filepath = await storage.get_filepath(code, filename)
-    file_sha256 = await storage.get_file_sha256(filepath)
+    file_sha256 = await storage.get_file_sha256(code, filename)
     if file_sha256 != sha256:
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
 
