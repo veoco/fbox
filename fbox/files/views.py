@@ -160,7 +160,7 @@ async def get_file(
     filename: str,
     ip_user: IPUser = Depends(get_ip),
 ):
-    if isinstance(storage, LocalStorage):
+    if not isinstance(storage, LocalStorage):
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
     
     box = get_box_or_404(ip_user, code)
@@ -185,7 +185,7 @@ async def post_file(
     sha256: str = Form(),
     ip_user: IPUser = Depends(get_ip),
 ):
-    if isinstance(storage, LocalStorage):
+    if not isinstance(storage, LocalStorage):
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
     
     box = get_box_or_404(ip_user, code)
