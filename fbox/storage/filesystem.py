@@ -31,6 +31,8 @@ class FileSystemStorage:
 
     def _save_dummy(self, filepath: PurePath, size: int):
         path = settings.DATA_ROOT / filepath
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True)
         with open(path, "wb") as f:
             f.truncate(size)
 
