@@ -57,6 +57,12 @@ class FileSystemStorage(LocalStorage):
         filepath = await self.get_filepath(code, filename)
         await asyncio.to_thread(self._save_slice, filepath, file.file, offset)
 
+    async def complete_file(self, code: str, filename: str, sha256: str) -> bool:
+        file_sha256 = await self.get_file_sha256(code, filename)
+        if file_sha256 == sha256:
+            return True
+        return False
+
     def _sha256(self, file: BinaryIO):
         m = hashlib.sha256()
         chunk = file.read(self.CHUNK_SIZE)
