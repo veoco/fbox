@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from starlette.config import Config
 from starlette.datastructures import Secret
@@ -21,3 +21,5 @@ ALGORITHM = "HS256"
 ADMIN_PASSWORD = config("ADMIN_PASSWORD", cast=str, default="password")
 
 BOX_EXPIRE = config("BOX_EXPIRE", cast=int, default=24 * 3600)
+
+STORAGE_ENGINE = config("STORAGE_ENGINE", cast=str, default="filesystem")
