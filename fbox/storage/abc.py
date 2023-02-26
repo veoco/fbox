@@ -14,6 +14,10 @@ class RemoteStorage(ABC):
         pass
 
     @abstractmethod
+    async def complete_file(self, code: str, filename: str, sha256: str) -> bool:
+        pass
+
+    @abstractmethod
     async def get_capacity(self):
         pass
 
@@ -61,9 +65,6 @@ class LocalStorage(RemoteStorage):
     async def get_sha256(self, file: BinaryIO):
         pass
 
-    @abstractmethod
-    async def get_file_sha256(self, code: str, filename: str):
-        pass
 
     @abstractmethod
     async def get_size(self, file: UploadFile):
