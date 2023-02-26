@@ -5,4 +5,4 @@ storage_engines = {
     "filesystem": FileSystemStorage,
 }
 
-storage = storage_engines[settings.STORAGE_ENGINE]
+storage = storage_engines[settings.STORAGE_ENGINE]()
