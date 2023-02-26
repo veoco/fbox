@@ -154,6 +154,3 @@ class FileSystemStorage:
 
     async def save_card(self, card: Card) -> None:
         await asyncio.to_thread(self._save_card, card)
-
-
-storage = FileSystemStorage()

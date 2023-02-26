@@ -17,7 +17,7 @@ from fbox.cards.models import Card
 from fbox.cards.depends import get_card
 from fbox.files.models import Box, FileCreate, IPUser, File
 from fbox.files.choices import UploadFailChoice, StatusChoice
-from fbox.files.storage import storage
+from fbox.storage import storage
 from fbox.files.utils import (
     generate_code,
     get_ip,

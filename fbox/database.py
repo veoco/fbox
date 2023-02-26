@@ -3,7 +3,7 @@ from fbox.log import logger
 from fbox.utils import get_now
 from fbox.files.models import Box, File, IPUser
 from fbox.files.choices import StatusChoice
-from fbox.files.storage import storage
+from fbox.storage import storage
 from fbox.cards.models import Card
 
 
