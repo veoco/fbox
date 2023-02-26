@@ -1,6 +1,6 @@
 import asyncio, os, hashlib, shutil
 from typing import BinaryIO
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from shutil import disk_usage
 
 from fastapi import UploadFile
@@ -9,9 +9,10 @@ from fbox import settings
 from fbox.utils import get_now
 from fbox.files.models import Box
 from fbox.cards.models import Card
+from fbox.storage.abc import LocalStorage
 
 
-class FileSystemStorage:
+class FileSystemStorage(LocalStorage):
     CHUNK_SIZE = 256 * 1024
 
     async def init_root(self):
