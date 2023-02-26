@@ -18,7 +18,7 @@ from fbox.cards.models import Card
 from fbox.cards.depends import get_card
 from fbox.files.models import Box, FileCreate, IPUser, File
 from fbox.files.choices import UploadFailChoice, StatusChoice
-from fbox.storage import storage
+from fbox.storage import storage, LocalStorage
 from fbox.files.utils import (
     generate_code,
     get_ip,
@@ -160,6 +160,9 @@ async def get_file(
     filename: str,
     ip_user: IPUser = Depends(get_ip),
 ):
+    if isinstance(storage, LocalStorage):
+        raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
+    
     box = get_box_or_404(ip_user, code)
     if box.status != StatusChoice.complete:
         raise HTTPException(status_code=404)
@@ -182,6 +185,9 @@ async def post_file(
     sha256: str = Form(),
     ip_user: IPUser = Depends(get_ip),
 ):
+    if isinstance(storage, LocalStorage):
+        raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
+    
     box = get_box_or_404(ip_user, code)
     if box.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
@@ -222,8 +228,8 @@ async def patch_file(
     if box_file.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
 
-    file_sha256 = await storage.get_file_sha256(code, filename)
-    if file_sha256 != sha256:
+    file_completed = await storage.complete_file(code, filename, sha256)
+    if not file_completed:
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
 
     box_file.status = StatusChoice.complete
