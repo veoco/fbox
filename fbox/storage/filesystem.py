@@ -28,16 +28,10 @@ class FileSystemStorage:
 
     async def get_filepath(self, code: str, filename: str):
         filepath = settings.DATA_ROOT / "box" / code / "files" / filename
-        exist = True
-
-        if filepath.exists():
-            return filepath, exist
-        else:
-            exist = False
 
         if not filepath.parent.exists():
             filepath.parent.mkdir(parents=True)
-        return filepath, exist
+        return filepath
 
     def _sha256(self, file: BinaryIO):
         m = hashlib.sha256()

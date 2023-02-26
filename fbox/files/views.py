@@ -84,7 +84,7 @@ async def post_box(
         file = File(status=StatusChoice.waiting, filename=f.name, size=f.size)
         box_files[f.name] = file
 
-        filepath, _ = await storage.get_filepath(code, f.name)
+        filepath = await storage.get_filepath(code, f.name)
         await storage.save_dummy_file(filepath, f.size)
 
     box = Box(
@@ -166,7 +166,7 @@ async def get_file(
 
     file = get_file_or_404(ip_user, code, filename)
     if file and file.status == StatusChoice.complete:
-        filepath, _ = await storage.get_filepath(code, filename)
+        filepath = await storage.get_filepath(code, filename)
         return FileResponse(filepath, filename=file.filename)
 
     raise HTTPException(status_code=404)
@@ -199,7 +199,7 @@ async def post_file(
     if file_sha256 != sha256:
         raise HTTPException(status_code=400, detail=f"UploadFailChoice.invalid_file")
 
-    filepath, _ = await storage.get_filepath(code, filename)
+    filepath = await storage.get_filepath(code, filename)
     await storage.save_file_slice(filepath, file, offset)
 
     update_rate(ip_user, "file", 10 * 1024 * 1024 * 1024, file_size)
@@ -222,7 +222,7 @@ async def patch_file(
     if box_file.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
 
-    filepath, _ = await storage.get_filepath(code, filename)
+    filepath = await storage.get_filepath(code, filename)
     file_sha256 = await storage.get_file_sha256(filepath)
     if file_sha256 != sha256:
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
