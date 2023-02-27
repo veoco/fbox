@@ -61,7 +61,7 @@ def test_create_complete_file(client: Client):
         assert r.status_code == 200
 
     r = client.patch(
-        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": m.hexdigest()}
+        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": m.hexdigest(), "extra": {}}
     )
     assert r.status_code == 200
 
@@ -86,8 +86,9 @@ def test_create_complete_box(client: Client):
 
     r = client.post(f"{BASE_URL}/api/files/{code}/{filename}", files=files, data=data)
     r = client.patch(
-        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": content_hash}
+        f"{BASE_URL}/api/files/{code}/{filename}", json={"sha256": content_hash, "extra": {}}
     )
 
     r = client.patch(f"{BASE_URL}/api/files/{code}")
+    print(r.text)
     assert r.status_code == 200
