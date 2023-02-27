@@ -236,7 +236,7 @@ async def patch_file(
     if box_file.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
 
-    file_completed = await storage.complete_file(code, filename, sha256)
+    file_completed = await storage.complete_file(code, filename, sha256, extra)
     if not file_completed:
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
 
