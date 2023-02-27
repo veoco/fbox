@@ -224,6 +224,7 @@ async def post_file(
 async def patch_file(
     code: str,
     filename: str,
+    extra: dict,
     sha256: str = Body(embed=True),
     ip_user: IPUser = Depends(get_ip),
 ):
