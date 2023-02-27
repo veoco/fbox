@@ -122,7 +122,8 @@ async def get_box(
     files = get_box_files(code)
     r = []
     for f in files:
-        r.append({"name": f.filename, "size": f.size})
+        url = await storage.get_url(code, f.filename)
+        r.append({"name": f.filename, "size": f.size, "url": url})
 
     return {
         "count": len(files),
