@@ -20,6 +20,10 @@ class RemoteStorage(ABC):
         pass
 
     @abstractmethod
+    async def get_url(self, code: str, filename: str) -> str:
+        pass
+
+    @abstractmethod
     async def get_capacity(self):
         pass
 

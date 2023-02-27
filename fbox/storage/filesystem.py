@@ -64,6 +64,9 @@ class FileSystemStorage(LocalStorage):
         if file_sha256 == sha256:
             return True
         return False
+    
+    async def get_url(self, code: str, filename: str) -> str:
+        return f"/api/files/{code}/{filename}"
 
     def _sha256(self, file: BinaryIO):
         m = hashlib.sha256()
