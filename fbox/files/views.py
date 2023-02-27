@@ -81,11 +81,13 @@ async def post_box(
     code = generate_code()
 
     box_files = {}
+    uploads = {}
     for f in files:
         file = File(status=StatusChoice.waiting, filename=f.name, size=f.size)
         box_files[f.name] = file
 
         upload_url = await storage.save_dummy_file(code, f.name, f.size)
+        uploads[f.name] = upload_url
 
     box = Box(
         code=code,
@@ -100,7 +102,12 @@ async def post_box(
 
     update_rate(ip_user, "box", 10)
 
-    return {"code": code, "detail": "20101"}
+    return {
+        "code": code,
+        "storage": settings.STORAGE_ENGINE,
+        "uploads": uploads,
+        "detail": "20101",
+    }
 
 
 @router.get("/files/{code}")
@@ -162,7 +169,7 @@ async def get_file(
 ):
     if not isinstance(storage, LocalStorage):
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
-    
+
     box = get_box_or_404(ip_user, code)
     if box.status != StatusChoice.complete:
         raise HTTPException(status_code=404)
@@ -187,7 +194,7 @@ async def post_file(
 ):
     if not isinstance(storage, LocalStorage):
         raise HTTPException(status_code=400, detail=f"{UploadFailChoice.invalid_file}")
-    
+
     box = get_box_or_404(ip_user, code)
     if box.status != StatusChoice.waiting:
         raise HTTPException(status_code=404)
