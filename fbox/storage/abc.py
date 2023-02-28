@@ -22,7 +22,7 @@ class RemoteStorage(ABC):
         pass
 
     @abstractmethod
-    async def save_dummy_file(self, code: str, filename: str, size: int) -> str:
+    async def save_dummy_file(self, code: str, filename: str, size: int) -> list[str]:
         pass
 
     @abstractmethod

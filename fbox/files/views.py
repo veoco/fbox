@@ -85,8 +85,8 @@ async def post_box(
         file = File(status=StatusChoice.waiting, filename=f.name, size=f.size)
         box_files[f.name] = file
 
-        upload_url = await storage.save_dummy_file(code, f.name, f.size)
-        uploads[f.name] = upload_url
+        upload_urls = await storage.save_dummy_file(code, f.name, f.size)
+        uploads[f.name] = upload_urls
 
     box = Box(
         code=code,

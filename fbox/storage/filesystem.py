@@ -33,10 +33,12 @@ class FileSystemStorage(LocalStorage):
     async def save_log(self, code: str, request: Request, now: int) -> None:
         await asyncio.to_thread(self._save_log, code, request, now)
 
-    async def save_dummy_file(self, code: str, filename: str, size: int) -> str:
+    async def save_dummy_file(self, code: str, filename: str, size: int) -> list[str]:
         filepath = await self.get_filepath(code, filename)
         await asyncio.to_thread(self._save_dummy, filepath, size)
-        return f"/api/files/{code}/{filename}"
+        return [
+            f"/api/files/{code}/{filename}",
+        ]
 
     async def complete_file(
         self, code: str, filename: str, sha256: str, extra: dict
