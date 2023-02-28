@@ -139,7 +139,11 @@ class S3RemoteStorage(RemoteStorage):
 
         filenames = set()
         for page in page_iterator:
-            for content in page["Contents"]:
+            contents = page.get("Contents")
+            if contents is None:
+                break
+
+            for content in contents:
                 key = content["Key"]
                 filename = key.split("/")[1]
                 filenames.add(filename)
@@ -181,7 +185,11 @@ class S3RemoteStorage(RemoteStorage):
             "Quiet": False,
         }
         for page in page_iterator:
-            for content in page["Contents"]:
+            contents = page.get("Contents")
+            if contents is None:
+                break
+            
+            for content in contents:
                 key = content["Key"]
                 delete_objects["Objects"].append({"Key": key})
 
@@ -203,7 +211,11 @@ class S3RemoteStorage(RemoteStorage):
             "Quiet": False,
         }
         for page in page_iterator:
-            for content in page["Contents"]:
+            contents = page.get("Contents")
+            if contents is None:
+                break
+            
+            for content in contents:
                 key = content["Key"]
                 size = content["Size"]
                 delete_objects["Objects"].append({"Key": key})
