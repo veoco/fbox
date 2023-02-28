@@ -252,7 +252,7 @@ class S3RemoteStorage(RemoteStorage):
             return None
 
     def _save_card(self, card: Card) -> None:
-        key = f"box/{card.code}.json"
+        key = f"card/{card.code}.json"
         card_json = card.json()
 
         self.client.put_object(
