@@ -117,6 +117,13 @@ class S3RemoteStorage(RemoteStorage):
                 UploadId=extra["UploadId"],
                 ChecksumSHA256=sha256_base64,
             )
+            r = self.client.head_object(
+                Bucket=settings.S3_DATA_BUCKET,
+                Key=key,
+            )
+            size = r["ContentLength"]
+            if size != extra["size"]:
+                return False
             return True
         except:
             return False
@@ -188,7 +195,7 @@ class S3RemoteStorage(RemoteStorage):
             contents = page.get("Contents")
             if contents is None:
                 break
-            
+
             for content in contents:
                 key = content["Key"]
                 delete_objects["Objects"].append({"Key": key})
@@ -214,12 +221,12 @@ class S3RemoteStorage(RemoteStorage):
             contents = page.get("Contents")
             if contents is None:
                 break
-            
+
             for content in contents:
                 key = content["Key"]
                 size = content["Size"]
                 delete_objects["Objects"].append({"Key": key})
-                
+
                 key_parts = key.split("/")
                 target_key_parts = ["box", key_parts[1], now]
                 target_key_parts.extend(key_parts[2:])
