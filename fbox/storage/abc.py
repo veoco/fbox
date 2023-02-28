@@ -10,6 +10,14 @@ from fbox.cards.models import Card
 
 class RemoteStorage(ABC):
     @abstractmethod
+    async def init(self) -> None:
+        pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        pass
+
+    @abstractmethod
     async def save_dummy_file(self, code: str, filename: str, size: int) -> str:
         pass
 
@@ -24,7 +32,7 @@ class RemoteStorage(ABC):
         pass
 
     @abstractmethod
-    async def get_capacity(self):
+    async def get_capacity(self) -> int:
         pass
 
     @abstractmethod
@@ -64,13 +72,13 @@ class LocalStorage(RemoteStorage):
     @abstractmethod
     async def save_file_slice(
         self, code: str, filename: str, file: UploadFile, offset: int
-    ):
+    ) -> None:
         pass
 
     @abstractmethod
-    async def get_sha256(self, file: BinaryIO):
+    async def get_sha256(self, file: BinaryIO) -> str:
         pass
 
     @abstractmethod
-    async def get_size(self, file: UploadFile):
+    async def get_size(self, file: UploadFile) -> int:
         pass

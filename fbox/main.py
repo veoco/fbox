@@ -23,12 +23,16 @@ async def clean_data():
 async def startup():
     logger.info("Running startup task")
 
-    await db.init_db()
+    await db.init()
     logger.info("Init database complete")
 
     asyncio.create_task(clean_data())
 
     logger.info("Startup task finished")
+
+
+async def shutdown():
+    await db.close()
 
 
 app = FastAPI(
@@ -37,6 +41,7 @@ app = FastAPI(
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     on_startup=[startup],
+    on_shutdown=[shutdown],
 )
 
 app.include_router(files_router, prefix="/api")

@@ -220,11 +220,14 @@ class IPUserDatabaseMixin:
 
 
 class Database(BoxDatabaseMixin, CardDatabaseMixin, IPUserDatabaseMixin):
-    async def init_db(self) -> None:
-        await storage.init_root()
+    async def init(self) -> None:
+        await storage.init()
 
         await self.init_boxes()
         await self.init_cards()
+
+    async def close(self) -> None:
+        await storage.close()
 
 
 db = Database()

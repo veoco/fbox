@@ -15,7 +15,7 @@ from fbox.storage.abc import LocalStorage
 class FileSystemStorage(LocalStorage):
     CHUNK_SIZE = 256 * 1024
 
-    async def init_root(self):
+    async def init(self) -> None:
         data_root = settings.DATA_ROOT
         box_data = data_root / "box"
         card_data = data_root / "card"
@@ -26,6 +26,9 @@ class FileSystemStorage(LocalStorage):
         logs_root = settings.LOGS_ROOT
         box_logs = logs_root / "box"
         box_logs.mkdir(parents=True, exist_ok=True)
+
+    async def close(self) -> None:
+        pass
 
     async def get_filepath(self, code: str, filename: str) -> PurePath:
         return PurePath("box") / code / "files" / filename
@@ -53,7 +56,7 @@ class FileSystemStorage(LocalStorage):
 
     async def save_file_slice(
         self, code: str, filename: str, file: UploadFile, offset: int
-    ):
+    ) -> None:
         filepath = await self.get_filepath(code, filename)
         await asyncio.to_thread(self._save_slice, filepath, file.file, offset)
 
@@ -64,7 +67,7 @@ class FileSystemStorage(LocalStorage):
         if file_sha256 == sha256:
             return True
         return False
-    
+
     async def get_url(self, code: str, filename: str) -> str:
         return f"/api/files/{code}/{filename}"
 
@@ -77,22 +80,22 @@ class FileSystemStorage(LocalStorage):
         file.seek(0, os.SEEK_SET)
         return m.hexdigest()
 
-    async def get_sha256(self, file: BinaryIO):
+    async def get_sha256(self, file: BinaryIO) -> str:
         return await asyncio.to_thread(self._sha256, file)
 
-    async def get_file_sha256(self, code: str, filename: str):
+    async def get_file_sha256(self, code: str, filename: str) -> str:
         path = settings.DATA_ROOT / await self.get_filepath(code, filename)
         with open(path, "rb") as f:
             return await asyncio.to_thread(self._sha256, f)
 
-    async def get_size(self, file: UploadFile):
+    async def get_size(self, file: UploadFile) -> int:
         f = file.file
         f.seek(0, os.SEEK_END)
         size = f.tell()
         f.seek(0, os.SEEK_SET)
         return size
 
-    async def get_capacity(self):
+    async def get_capacity(self) -> int:
         total, used, free = await asyncio.to_thread(disk_usage, settings.DATA_ROOT)
         return int(used / total * 200)
 
