@@ -1,2 +1,3 @@
 fastapi[all]>=0.88.0
 python-jose[cryptography]>=3.3.0
+botocore>=1.27.59

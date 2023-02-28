@@ -106,7 +106,8 @@ class FileSystemStorage(LocalStorage):
             return await asyncio.to_thread(self._sha256, f)
 
     def _save_log(self, code: str, request: Request, now: int) -> None:
-        r = {"created": now}
+        r = {}
+        r.update({"created": now})
         for k, v in request.headers.items():
             r.update({k: v})
         res = json.dumps(r)
