@@ -91,7 +91,7 @@ class S3RemoteStorage(RemoteStorage):
 
         for i in range(1, max_count + 1):
             url = self.client.generate_presigned_url(
-                ClientMethod="uploadPart",
+                ClientMethod="upload_part",
                 Params={
                     "Bucket": settings.S3_DATA_BUCKET,
                     "Key": key,
