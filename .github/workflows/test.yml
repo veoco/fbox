@@ -42,7 +42,7 @@ jobs:
       S3_SECRET_KEY: "minioadmin"
     services:
       minio:
-        image: minio/minio
+        image: bitnami/minio:latest
         ports:
           - 9000:9000
     steps:
