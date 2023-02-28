@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import PurePath
 from typing import BinaryIO
 
-from fastapi import UploadFile
+from fastapi import UploadFile, Request
 
 from fbox.files.models import Box
 from fbox.cards.models import Card
@@ -15,6 +15,10 @@ class RemoteStorage(ABC):
 
     @abstractmethod
     async def close(self) -> None:
+        pass
+
+    @abstractmethod
+    async def save_log(self, code: str, request: Request, now: int) -> None:
         pass
 
     @abstractmethod

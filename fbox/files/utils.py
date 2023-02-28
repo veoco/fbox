@@ -1,30 +1,11 @@
-import json, asyncio
 from random import randint
 
 from fastapi import Request, HTTPException
 
-from fbox import settings
 from fbox.utils import get_now
 from fbox.database import db
 from fbox.files.models import IPUser, Box, File
 from fbox.files.choices import UploadFailChoice
-
-
-def _write_log(res: str, code: str):
-    filepath = settings.DATA_ROOT / "box" / code / f"user.json"
-    if not filepath.parent.exists():
-        filepath.parent.mkdir(parents=True)
-
-    with open(filepath, "w") as f:
-        f.write(res)
-
-
-async def write_log(request: Request, code: str, now: int):
-    r = {"created": now}
-    for k, v in request.headers.items():
-        r.update({k: v})
-    res = json.dumps(r)
-    await asyncio.to_thread(_write_log, res, code)
 
 
 async def get_ip(request: Request) -> IPUser:

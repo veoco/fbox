@@ -22,7 +22,6 @@ from fbox.storage import storage, LocalStorage
 from fbox.files.utils import (
     generate_code,
     get_ip,
-    write_log,
     get_box_or_404,
     get_file_or_404,
     get_box_files,
@@ -157,7 +156,7 @@ async def patch_box(
 
     logger.info(f"Completed box {box.code}")
 
-    await write_log(request, code, now)
+    await storage.save_log(code, request, now)
 
     return {"code": code, "detail": "20001"}
 

@@ -1,9 +1,9 @@
-import asyncio, os, hashlib, shutil
+import asyncio, os, hashlib, shutil, json
 from typing import BinaryIO
 from pathlib import PurePath
 from shutil import disk_usage
 
-from fastapi import UploadFile
+from fastapi import UploadFile, Request
 
 from fbox import settings
 from fbox.utils import get_now
@@ -29,6 +29,9 @@ class FileSystemStorage(LocalStorage):
 
     async def close(self) -> None:
         pass
+
+    async def save_log(self, code: str, request: Request, now: int) -> None:
+        await asyncio.to_thread(self._save_log, code, request, now)
 
     async def save_dummy_file(self, code: str, filename: str, size: int) -> str:
         filepath = await self.get_filepath(code, filename)
@@ -99,6 +102,19 @@ class FileSystemStorage(LocalStorage):
         path = settings.DATA_ROOT / await self.get_filepath(code, filename)
         with open(path, "rb") as f:
             return await asyncio.to_thread(self._sha256, f)
+
+    def _save_log(self, code: str, request: Request, now: int) -> None:
+        r = {"created": now}
+        for k, v in request.headers.items():
+            r.update({k: v})
+        res = json.dumps(r)
+
+        filepath = settings.DATA_ROOT / "box" / code / f"user.json"
+        if not filepath.parent.exists():
+            filepath.parent.mkdir(parents=True)
+
+        with open(filepath, "w") as f:
+            f.write(res)
 
     def _save_dummy(self, filepath: PurePath, size: int):
         path = settings.DATA_ROOT / filepath
