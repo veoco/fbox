@@ -1,4 +1,4 @@
-import asyncio, json, base64
+import asyncio, json
 
 from fastapi import Request
 from botocore import session
@@ -78,7 +78,7 @@ class S3RemoteStorage(RemoteStorage):
         )
 
     def _save_dummy_file(self, code: str, filename: str, size: int) -> list[str]:
-        key = f"box/{code}/{filename}"
+        key = f"box/{code}/files/{filename}"
         r = self.client.create_multipart_upload(
             Bucket=settings.S3_DATA_BUCKET,
             Key=key,
@@ -106,30 +106,31 @@ class S3RemoteStorage(RemoteStorage):
     def _complete_file(
         self, code: str, filename: str, sha256: str, extra: dict
     ) -> bool:
-        key = f"box/{code}/{filename}"
-        sha256_base64 = base64.b64encode(sha256.encode("utf-8")).decode("utf-8")
+        key = f"box/{code}/files/{filename}"
 
         try:
             self.client.complete_multipart_upload(
                 Bucket=settings.S3_DATA_BUCKET,
                 Key=key,
-                MultipartUpload=extra["Parts"],
+                MultipartUpload={"Parts": extra["Parts"]},
                 UploadId=extra["UploadId"],
-                ChecksumSHA256=sha256_base64,
             )
-            r = self.client.head_object(
+
+            r = self.client.get_object(
                 Bucket=settings.S3_DATA_BUCKET,
                 Key=key,
             )
             size = r["ContentLength"]
             if size != extra["size"]:
                 return False
+
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def _get_url(self, code: str, filename: str) -> str:
-        key = f"box/{code}/{filename}"
+        key = f"box/{code}/files/{filename}"
         expire = int(settings.BOX_EXPIRE / 10)
         url = self.client.generate_presigned_url(
             ClientMethod="get_object",
