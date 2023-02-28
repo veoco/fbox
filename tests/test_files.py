@@ -60,7 +60,7 @@ def test_filesystem_create_complete_file(client: Client):
             "offset": i * 1024,
             "sha256": content_hash,
         }
-        r = client.post(upload_urls[0], files=files, data=data)
+        r = client.post(f"{BASE_URL}{upload_urls[0]}", files=files, data=data)
         print(r.text)
         assert r.status_code == 200
 
