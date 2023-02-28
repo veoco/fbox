@@ -20,6 +20,20 @@ class S3RemoteStorage(RemoteStorage):
             endpoint_url=settings.S3_ENDPOINT_URL,
         )
 
+        try:
+            self.client.create_bucket(
+                Bucket=settings.S3_DATA_BUCKET,
+            )
+        except:
+            pass
+
+        try:
+            self.client.create_bucket(
+                Bucket=settings.S3_LOGS_BUCKET,
+            )
+        except:
+            pass
+
     async def close(self) -> None:
         self.client.close()
 
