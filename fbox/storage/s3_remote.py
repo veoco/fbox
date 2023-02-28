@@ -125,8 +125,7 @@ class S3RemoteStorage(RemoteStorage):
                 return False
 
             return True
-        except Exception as e:
-            print(e)
+        except:
             return False
 
     def _get_url(self, code: str, filename: str) -> str:
