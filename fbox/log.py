@@ -7,7 +7,7 @@ from fbox import settings
 
 class LogConfig(BaseModel):
     LOGGER_NAME: str = "fbox"
-    LOG_FORMAT: str = "%(levelprefix)s%(asctime)s - %(message)s"
+    LOG_FORMAT: str = "%(levelprefix)s - %(message)s"
     LOG_LEVEL: str = "DEBUG" if settings.DEBUG else "INFO"
 
     version = 1
