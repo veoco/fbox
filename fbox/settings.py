@@ -14,6 +14,8 @@ DATA_ROOT = config("DATA_ROOT", cast=Path, default=Path("data"))
 
 LOGS_ROOT = config("LOGS_ROOT", cast=Path, default=Path("logs"))
 
+WWW_ROOT = config("WWW_ROOT", cast=Path, default=Path("www"))
+
 SECRET_KEY = config("SECRET_KEY", cast=Secret)
 
 ALGORITHM = "HS256"

@@ -1,9 +1,11 @@
 import asyncio
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from fbox import settings
 from fbox.log import logger
 from fbox.database import db
+from fbox.preload import router as preload_router
 from fbox.files.views import router as files_router
 from fbox.cards.views import router as cards_router
 from fbox.admin.views import router as admin_router
@@ -44,6 +46,8 @@ app = FastAPI(
     on_shutdown=[shutdown],
 )
 
+app.include_router(preload_router, prefix="")
 app.include_router(files_router, prefix="/api")
 app.include_router(cards_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.mount("", StaticFiles(directory=settings.WWW_ROOT), name="static")
