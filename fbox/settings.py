@@ -22,7 +22,31 @@ ALGORITHM = "HS256"
 
 ADMIN_PASSWORD = config("ADMIN_PASSWORD", cast=str, default="password")
 
+SITE_TITLE = config("SITE_TITLE", cast=str, default="DBox")
+
+SITE_API_DOCS = config("SITE_API_DOCS", cast=bool, default=True)
+
+RATE_BOX_COUNT_LIMIT = config("RATE_BOX_COUNT_LIMIT", cast=int, default=10)
+
+RATE_BOX_ERROR_LIMIT = config("RATE_BOX_ERROR_LIMIT", cast=int, default=10)
+
+RATE_FILE_SIZE_LIMIT = config("RATE_FILE_SIZE_LIMIT", cast=int, default=10 * 1024 * 1024 * 1024)
+
 BOX_EXPIRE = config("BOX_EXPIRE", cast=int, default=24 * 3600)
+
+BOX_CLEAN_PERIOD = config("BOX_CLEAN_PERIOD", cast=int, default=60)
+
+FILE_MAX_COUNT = config("FILE_MAX_COUNT", cast=int, default=5)
+
+FILE_MAX_SIZE = config("FILE_MAX_SIZE", cast=int, default=100 * 1000 * 1000)
+
+FILE_RED_MAX_COUNT = config("FILE_RED_MAX_COUNT", cast=int, default=10)
+
+FILE_RED_MAX_SIZE = config("FILE_RED_MAX_SIZE", cast=int, default=1000 * 1000 * 1000)
+
+CARD_EXPIRE = config("CARD_EXPIRE", cast=int, default=0)
+
+CARD_VALID_COUNT = config("CARD_VALID_COUNT", cast=int, default=10)
 
 STORAGE_ENGINE = config("STORAGE_ENGINE", cast=str, default="filesystem")
 

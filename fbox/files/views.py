@@ -47,13 +47,14 @@ async def post_box(
 ):
     now = int(get_now().timestamp())
 
-    files_count_max = 5
-    files_size_max = 100 * 1024 * 1024
+    files_count_max = settings.FILE_MAX_COUNT
+    files_size_max = settings.FILE_MAX_SIZE
     if card.level == LevelChoice.red:
         card.count -= 1
         await db.save_card(card)
 
-        files_size_max = 1024 * 1024 * 1024
+        files_count_max = settings.FILE_RED_MAX_COUNT
+        files_size_max = settings.FILE_RED_MAX_SIZE
 
     check_rate(ip_user, "box")
 
@@ -99,7 +100,7 @@ async def post_box(
 
     logger.info(f"Created box {box.code} with {len(files)} files")
 
-    update_rate(ip_user, "box", 10)
+    update_rate(ip_user, "box", settings.RATE_BOX_COUNT_LIMIT)
 
     return {
         "code": code,
@@ -215,7 +216,7 @@ async def post_file(
 
     await storage.save_file_slice(code, filename, file, offset)
 
-    update_rate(ip_user, "file", 10 * 1024 * 1024 * 1024, file_size)
+    update_rate(ip_user, "file", settings.RATE_FILE_SIZE_LIMIT, file_size)
 
     return {"code": code, "filename": filename, "detail": "20001"}
 

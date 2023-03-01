@@ -19,7 +19,7 @@ async def clean_data():
         db.clean_expire_ip_user()
 
         logger.info("Clean data finished")
-        await asyncio.sleep(60)
+        await asyncio.sleep(settings.BOX_CLEAN_PERIOD)
 
 
 async def startup():
@@ -39,9 +39,9 @@ async def shutdown():
 
 app = FastAPI(
     debug=settings.DEBUG,
-    title="DBOX",
-    docs_url="/api/docs",
-    openapi_url="/api/openapi.json",
+    title=settings.SITE_TITLE,
+    docs_url="/api/docs" if settings.SITE_API_DOCS else None,
+    openapi_url="/api/openapi.json" if settings.SITE_API_DOCS else None,
     on_startup=[startup],
     on_shutdown=[shutdown],
 )

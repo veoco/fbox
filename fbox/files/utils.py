@@ -2,6 +2,7 @@ from random import randint
 
 from fastapi import Request, HTTPException
 
+from fbox import settings
 from fbox.utils import get_now
 from fbox.database import db
 from fbox.files.models import IPUser, Box, File
@@ -58,7 +59,7 @@ def get_box_or_404(ip_user: IPUser, code) -> Box:
 
     box = db.get_box(code)
     if box is None:
-        update_rate(ip_user, "box", 10)
+        update_rate(ip_user, "box", settings.RATE_BOX_ERROR_LIMIT)
         raise HTTPException(status_code=404)
 
     return box
@@ -69,7 +70,7 @@ def get_file_or_404(ip_user: IPUser, code: str, filename: str) -> File:
 
     file = db.get_file(code, filename)
     if file is None:
-        update_rate(ip_user, "file", 10 * 1024 * 1024 * 1024, 1024 * 1024 * 100)
+        update_rate(ip_user, "file", settings.RATE_FILE_SIZE_LIMIT, settings.FILE_MAX_SIZE)
         raise HTTPException(status_code=404)
 
     return file

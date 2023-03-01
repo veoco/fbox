@@ -143,7 +143,7 @@ class CardDatabaseMixin:
             f"Card {card.code} count {card.count} passed {now - card.created} seconds"
         )
 
-        if card.created > 0 and (now - card.created) >= (365 * 24 * 3600):
+        if card.created > 0 and (now - card.created) >= settings.CARD_EXPIRE:
             return True
 
         if card.count == 0:

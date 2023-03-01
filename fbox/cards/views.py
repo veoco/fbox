@@ -4,6 +4,7 @@ from fastapi import (
     Depends,
 )
 
+from fbox import settings
 from fbox.log import logger
 from fbox.database import db
 from fbox.cards.models import Card
@@ -18,7 +19,7 @@ router = APIRouter(tags=["Cards"])
 @router.post("/cards/", status_code=201, dependencies=[Depends(token_required)])
 async def post_cards():
     code = generate_card_code()
-    card = Card(code=code, level=LevelChoice.red, count=10, created=0)
+    card = Card(code=code, level=LevelChoice.red, count=settings.CARD_VALID_COUNT, created=0 if settings.CARD_EXPIRE <= 0 else settings.CARD_EXPIRE)
     await db.save_card(card)
 
     logger.info(f"Generated card {card.code}")
