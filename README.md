@@ -13,7 +13,6 @@ docker run -d \
   -p 8000:8000 \
   -v /host_path/data:/app/data \
   -v /host_path/logs:/app/logs \
-  -v /host_path/www:/app/www \
   -e SECRET_KEY=yourownsecretkey \
   -- name fbox \
   ghcr.io/veoco/fbox
